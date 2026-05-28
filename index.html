@@ -1242,7 +1242,7 @@ async function loadFollowUpNudges() {
               <div class="nudge-name">${n.name}</div>
               <div class="nudge-company">${n.company}</div>
             </div>
-            <div class="nudge-date ${urgency === 'overdue' ? 'overdue' : ''}">${label} &bull; ${n.nextCall}</div>
+            <div class="nudge-date ${urgency === 'overdue' ? 'overdue' : ''}">${label} &bull; ${formatDate(n.nextCall)}</div>
             <div class="nudge-tab">${tabLabel}</div>
           </div>
         `;
@@ -1256,6 +1256,12 @@ async function loadFollowUpNudges() {
 
   btn.disabled = false;
   btn.innerHTML = '<span>🔄</span> Refresh';
+}
+
+function formatDate(str) {
+  const d = parseDate(str);
+  if (!d) return str;
+  return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;
 }
 
 function parseDate(str) {
