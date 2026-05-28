@@ -670,7 +670,7 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-icon">📅</div>
-        <span class="panel-title">Who Needs a Call Today?</span>
+        <span class="panel-title">Overdue & Due This Week</span>
       </div>
       <div class="panel-body">
         <button class="btn-primary" id="loadNudgesBtn" onclick="loadFollowUpNudges()" style="margin-bottom:20px;">
@@ -1213,7 +1213,7 @@ async function loadFollowUpNudges() {
         const nextCall = parseDate(nextCallStr);
         if (!nextCall) continue;
         const diffDays = Math.floor((nextCall - today) / (1000*60*60*24));
-        if (diffDays <= 3) {
+        if (diffDays <= 7) {  // overdue or due within 7 days
           nudges.push({
             name: name.trim(),
             company: row[cfg.companyCol] || '',
@@ -1260,14 +1260,20 @@ async function loadFollowUpNudges() {
 
 function parseDate(str) {
   if (!str) return null;
-  // Handle formats like 5/18, 5/18/26, 5/18/2026
-  const parts = str.trim().split('/');
-  if (parts.length < 2) return null;
-  const m = parseInt(parts[0]);
-  const d = parseInt(parts[1]);
-  const y = parts[2] ? (parseInt(parts[2]) < 100 ? 2000 + parseInt(parts[2]) : parseInt(parts[2])) : new Date().getFullYear();
-  if (isNaN(m) || isNaN(d)) return null;
-  return new Date(y, m-1, d);
+  // Extract just the date portion - grab first token that looks like M/D or M/D/YY
+  const match = str.toString().trim().match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+  if (!match) return null;
+  const m = parseInt(match[1]);
+  const d = parseInt(match[2]);
+  let y;
+  if (match[3]) {
+    const raw = parseInt(match[3]);
+    y = raw < 100 ? 2000 + raw : raw;
+  } else {
+    y = new Date().getFullYear();
+  }
+  if (isNaN(m) || isNaN(d) || isNaN(y)) return null;
+  return new Date(y, m - 1, d);
 }
 
 // ==========================================
