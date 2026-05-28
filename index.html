@@ -886,17 +886,19 @@ async function parseDebrief(text) {
   const systemPrompt = `You are a CRM assistant for Nate Dahlin, a mortgage loan officer in Tampa FL.
 Parse a call debrief and extract structured update data. Return ONLY valid JSON, no markdown, no explanation.
 
+CRITICAL: Always extract the contact's full name. The name is always a person mentioned in the debrief - look for first and last names. Common patterns: "Had a call with [Name]", "Talked to [Name]", "Met with [Name]", "Called [Name]", "[Name] and I", etc.
+
 Output format:
 {
-  "contact_name": "full name mentioned",
+  "contact_name": "full name of the person Nate spoke with",
   "updates": {
-    "notes": "new note to append or replace (preserve existing context, add new info)",
+    "notes": "concise note summarizing what was discussed",
     "last_reach_out": "date if mentioned or today ${today}",
-    "next_call": "follow-up date if mentioned",
+    "next_call": "follow-up date if mentioned (calculate from today ${today} if relative like 'two weeks from today')",
     "production": "volume/units if mentioned",
     "social": "Y or N if mentioned",
     "leads_referred": "number if mentioned",
-    "f2f_bb": "F2F or BB with date if mentioned (F2F=quick meeting, BB=sit-down)",
+    "f2f_bb": "F2F or BB with date if mentioned (F2F=quick meeting, BB=sit-down meal)",
     "zoom": "date if zoom mentioned",
     "last_contact": "${today}",
     "hobbies": "personal info if mentioned",
@@ -907,7 +909,7 @@ Output format:
   "confidence": 0.9
 }
 
-Only include fields in "updates" if they have actual values from the debrief. Always include last_reach_out and last_contact as today if not stated. Notes should be concise and professional.`;
+Only include fields in "updates" if they have actual values. Always include last_reach_out and last_contact as today if not stated. Notes should be concise and professional. For relative dates like "two weeks from today", calculate the actual date.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
