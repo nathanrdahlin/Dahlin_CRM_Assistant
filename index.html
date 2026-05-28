@@ -616,6 +616,13 @@
   <span style="color:rgba(250,248,243,0.5); font-size:13px; font-weight:500;">2026 GO! Accountability Workbook</span>
 </div>
 
+<!-- Anthropic Key Banner -->
+<div class="setup-banner" id="anthropicBanner" style="display:none;">
+  <span class="setup-label">Anthropic Key</span>
+  <input type="password" class="setup-input" id="anthropicKeyInput" placeholder="Paste your Anthropic API key (sk-ant-...)..." />
+  <button class="btn-setup" onclick="saveAnthropicKey()">Save Key</button>
+</div>
+
 <div class="main">
 
   <!-- TAB BAR -->
@@ -721,6 +728,7 @@
 // ==========================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoF-O2C_5Lxi8cxZIYti0FghcaSISzwZsBLA-ZcLtqM7pdJ21eVXCyaoT-nVP8_qgs/exec';
 const SECRET_TOKEN = 'lopi4';
+let ANTHROPIC_KEY = localStorage.getItem('dahlin_anthropic_key') || '';
 
 // Column maps (0-indexed, based on actual sheet structure)
 // Target 300: Name(A), #(B), D/E/F(C), Company(D), Phone(E), Email(F), Notes(G), Last Reach Out(H), Next Call(I), Production(J), Social(K), Leads Referred(L), Last Lead Date(M), F2F/BB(N), Zoom(O), Last Contact(P), Birthday(Q), Gifted(R), Hobbies(S), Important(T), Address(U)
@@ -761,8 +769,19 @@ let pendingUpdate = null;
 // INIT
 // ==========================================
 window.onload = () => {
-  // Nothing to initialize - Apps Script handles auth
+  if (!ANTHROPIC_KEY) {
+    document.getElementById('anthropicBanner').style.display = 'flex';
+  }
 };
+
+function saveAnthropicKey() {
+  const key = document.getElementById('anthropicKeyInput').value.trim();
+  if (!key) return;
+  ANTHROPIC_KEY = key;
+  localStorage.setItem('dahlin_anthropic_key', key);
+  document.getElementById('anthropicBanner').style.display = 'none';
+  showToast('Key Saved', 'Anthropic API key saved to this browser.');
+}
 
 // ==========================================
 // TAB SWITCHING
@@ -892,7 +911,12 @@ Only include fields in "updates" if they have actual values from the debrief. Al
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
@@ -918,6 +942,13 @@ async function analyzeDebrief() {
   btn.disabled = true;
   showStatus('loading', 'Reading your debrief...');
   hideConfirmCard();
+
+  if (!ANTHROPIC_KEY) {
+    document.getElementById('anthropicBanner').style.display = 'flex';
+    showStatus('error', 'Please enter your Anthropic API key first.');
+    btn.disabled = false;
+    return;
+  }
 
   try {
     // Step 1: Parse debrief with AI
@@ -1326,7 +1357,12 @@ Return ONLY the JSON array, no markdown.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
