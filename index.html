@@ -1033,8 +1033,8 @@ function showConfirmUpdate(match, parsed) {
     let writeVal = newVal;
     if (f.key === 'notes' && oldVal) {
       const today = new Date().toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'2-digit'});
-      writeVal = `${oldVal} | ${today}: ${newVal}`;
-      displayNew = `[appended] ${newVal}`;
+      writeVal = `${today}: ${newVal} | ${oldVal}`;
+      displayNew = `[newest first] ${newVal}`;
     }
     html += `
       <tr>
