@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dahlin CRM Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Darker+Grotesque:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1F2A44;
+    --navy-light: #2a3a5c;
+    --charcoal: #4B4B4B;
+    --black: #101010;
+    --green: #00A86B;
+    --green-dark: #008a57;
+    --cream: #FAF8F3;
+    --cream-dark: #f0ece3;
+    --white: #ffffff;
+    --border: rgba(31,42,68,0.12);
+    --shadow: 0 4px 24px rgba(16,16,16,0.10);
+    --shadow-lg: 0 8px 40px rgba(16,16,16,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    font-family: 'Darker Grotesque', sans-serif;
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--green);
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo {
+    width: 38px;
+    height: 38px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    color: white;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    color: var(--cream);
+    font-size: 20px;
+    letter-spacing: 0.01em;
+  }
+  .header-sub {
+    color: rgba(250,248,243,0.5);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* API KEY SETUP */
+  .setup-banner {
+    background: var(--navy-light);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .setup-banner.hidden { display: none; }
+  .setup-label {
+    color: rgba(250,248,243,0.7);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .setup-input {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--cream);
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .setup-input:focus { border-color: var(--green); }
+  .setup-input::placeholder { color: rgba(250,248,243,0.3); }
+  .btn-setup {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-setup:hover { background: var(--green-dark); }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* TAB BAR */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: var(--cream-dark);
+    border-radius: 10px;
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--charcoal);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.18s;
+  }
+  .tab-btn.active {
+    background: var(--navy);
+    color: var(--cream);
+    box-shadow: var(--shadow);
+  }
+  .tab-btn:hover:not(.active) { background: rgba(31,42,68,0.08); }
+
+  /* DEBRIEF PANEL */
+  .panel {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .panel-header {
+    background: var(--navy);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(0,168,107,0.2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .panel-title {
+    font-family: 'DM Serif Display', serif;
+    color: var(--cream);
+    font-size: 17px;
+  }
+  .panel-body { padding: 24px; }
+
+  /* DEBRIEF TEXTAREA */
+  .debrief-area {
+    width: 100%;
+    min-height: 130px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--navy);
+    background: var(--cream);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.6;
+  }
+  .debrief-area:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(0,168,107,0.1);
+  }
+  .debrief-area::placeholder { color: rgba(31,42,68,0.35); font-weight: 400; }
+
+  .debrief-hint {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--charcoal);
+    opacity: 0.6;
+    font-weight: 500;
+  }
+
+  .debrief-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--navy);
+    color: var(--cream);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary {
+    background: transparent;
+    color: var(--charcoal);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-confirm {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-confirm:hover { background: var(--green-dark); }
+
+  /* STATUS / LOADING */
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: rgba(0,168,107,0.06);
+    border: 1px solid rgba(0,168,107,0.2);
+    border-radius: 9px;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+  .status-bar.visible { display: flex; }
+  .status-bar.error {
+    background: rgba(220,53,69,0.06);
+    border-color: rgba(220,53,69,0.2);
+    color: #c0392b;
+  }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0,168,107,0.3);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONFIRMATION CARD */
+  .confirm-card {
+    display: none;
+    background: white;
+    border-radius: 14px;
+    border: 2px solid var(--green);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+    animation: slideIn 0.25s ease;
+  }
+  .confirm-card.visible { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .confirm-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .confirm-title {
+    font-family: 'DM Serif Display', serif;
+    color: var(--cream);
+    font-size: 16px;
+  }
+  .confirm-badge {
+    background: var(--green);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .confirm-body { padding: 20px 24px; }
+
+  /* CONTACT MATCH */
+  .match-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--cream);
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .match-avatar {
+    width: 42px;
+    height: 42px;
+    background: var(--navy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    color: var(--cream);
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .match-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--navy);
+  }
+  .match-meta {
+    font-size: 13px;
+    color: var(--charcoal);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .match-tab {
+    margin-left: auto;
+    background: rgba(31,42,68,0.08);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* MULTIPLE MATCHES */
+  .match-select-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .match-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--cream);
+    border-radius: 9px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .match-option:hover { border-color: var(--navy); background: white; }
+  .match-option.selected { border-color: var(--green); background: rgba(0,168,107,0.05); }
+  .match-option-name { font-weight: 700; font-size: 15px; color: var(--navy); }
+  .match-option-meta { font-size: 13px; color: var(--charcoal); font-weight: 500; }
+
+  /* CHANGES TABLE */
+  .changes-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    margin-bottom: 10px;
+    opacity: 0.7;
+  }
+  .changes-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  .changes-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    opacity: 0.6;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .changes-table td {
+    padding: 10px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(31,42,68,0.05);
+    vertical-align: top;
+  }
+  .changes-table tr:last-child td { border-bottom: none; }
+  .col-field { color: var(--navy); font-weight: 700; width: 170px; }
+  .col-old { color: var(--charcoal); opacity: 0.6; font-style: italic; }
+  .col-new { color: var(--navy); }
+  .col-new .new-val {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .new-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .empty-val { opacity: 0.35; font-style: italic; }
+
+  .confirm-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 4px;
+  }
+
+  /* NEW CONTACT FORM */
+  .new-contact-form { display: flex; flex-direction: column; gap: 14px; }
+  .form-row { display: flex; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .form-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    opacity: 0.7;
+  }
+  .form-input, .form-select {
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 13px;
+    font-family: 'Darker Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--navy);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--green); }
+
+  /* FOLLOW-UP NUDGES */
+  .nudge-list { display: flex; flex-direction: column; gap: 10px; }
+  .nudge-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 6px rgba(16,16,16,0.06);
+    transition: box-shadow 0.18s;
+  }
+  .nudge-item:hover { box-shadow: var(--shadow); }
+  .nudge-urgency {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .urgency-overdue { background: #e74c3c; }
+  .urgency-today { background: #f39c12; }
+  .urgency-soon { background: var(--green); }
+  .nudge-name { font-weight: 700; font-size: 15px; color: var(--navy); flex: 1; }
+  .nudge-company { font-size: 13px; color: var(--charcoal); font-weight: 500; }
+  .nudge-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--charcoal);
+    background: var(--cream-dark);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .nudge-date.overdue { background: rgba(231,76,60,0.1); color: #c0392b; }
+  .nudge-tab {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.5;
+    width: 80px;
+    text-align: right;
+  }
+
+  /* SUCCESS TOAST */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--navy);
+    color: var(--cream);
+    border-left: 4px solid var(--green);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-title { font-family: 'DM Serif Display', serif; font-size: 16px; margin-bottom: 3px; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--charcoal);
+    opacity: 0.5;
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; font-weight: 600; }
+
+  /* SECTION DIVIDER */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 20px;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    opacity: 0.5;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .header { padding: 14px 16px; }
+    .main { padding: 20px 14px 40px; }
+    .setup-banner { flex-wrap: wrap; }
+    .form-row { flex-direction: column; }
+    .tab-btn { font-size: 11px; padding: 8px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">D</div>
+    <div>
+      <div class="header-title">Dahlin CRM Assistant</div>
+      <div class="header-sub">Ballin with Dahlin</div>
+    </div>
+  </div>
+</div>
+
+<!-- Connected indicator -->
+<div class="setup-banner" id="setupBanner" style="background:#1a3a2a; border-bottom:1px solid rgba(0,168,107,0.3);">
+  <span style="color:var(--green); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">● Connected</span>
+  <span style="color:rgba(250,248,243,0.5); font-size:13px; font-weight:500;">2026 GO! Accountability Workbook</span>
+</div>
+
+<div class="main">
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('debrief')">Call Debrief</button>
+    <button class="tab-btn" onclick="switchTab('followup')">Follow-Up Nudges</button>
+    <button class="tab-btn" onclick="switchTab('retr')">RETR Import</button>
+  </div>
+
+  <!-- ===== DEBRIEF TAB ===== -->
+  <div id="tab-debrief">
+
+    <!-- Confirmation Card (hidden until match found) -->
+    <div class="confirm-card" id="confirmCard">
+      <div class="confirm-header">
+        <span class="confirm-title" id="confirmTitle">Review Before Saving</span>
+        <span class="confirm-badge" id="confirmBadge">Confirm</span>
+      </div>
+      <div class="confirm-body" id="confirmBody"></div>
+    </div>
+
+    <!-- Debrief Input -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon">🎙️</div>
+        <span class="panel-title">Log a Call or Meeting</span>
+      </div>
+      <div class="panel-body">
+        <textarea
+          class="debrief-area"
+          id="debriefInput"
+          placeholder="Just talk it out. Example: 'Called Jason Arvin today. He's warmed up, wants to try me on his next buyer. Luxury focus. Follow up June 18. Met for coffee, 30 min BB.'"
+        ></textarea>
+        <div class="debrief-hint">Mention the person's name, what was discussed, and any follow-up date. The assistant handles the rest.</div>
+        <div class="debrief-actions">
+          <button class="btn-primary" id="analyzeBtn" onclick="analyzeDebrief()">
+            <span>🔍</span> Find & Preview Update
+          </button>
+          <button class="btn-secondary" onclick="clearDebrief()">Clear</button>
+        </div>
+        <div class="status-bar" id="statusBar">
+          <div class="spinner" id="statusSpinner"></div>
+          <span id="statusText">Searching your contacts...</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FOLLOW-UP TAB ===== -->
+  <div id="tab-followup" style="display:none;">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon">📅</div>
+        <span class="panel-title">Who Needs a Call Today?</span>
+      </div>
+      <div class="panel-body">
+        <button class="btn-primary" id="loadNudgesBtn" onclick="loadFollowUpNudges()" style="margin-bottom:20px;">
+          <span>🔄</span> Load Follow-Up List
+        </button>
+        <div id="nudgeList"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Click above to load contacts with overdue or upcoming call dates</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RETR IMPORT TAB ===== -->
+  <div id="tab-retr" style="display:none;">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon">📊</div>
+        <span class="panel-title">Import Agent Production Data</span>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:15px; font-weight:500; color:var(--charcoal); margin-bottom:16px; line-height:1.6;">Export your agent list from RETR as a CSV, then paste the contents below. The assistant will match agents to your existing contacts and update their production data.</p>
+        <textarea
+          class="debrief-area"
+          id="retrInput"
+          placeholder="Paste CSV data from RETR here... (Name, Volume, Transactions, etc.)"
+          style="min-height:160px; font-size:13px; font-family: monospace;"
+        ></textarea>
+        <div class="debrief-actions" style="margin-top:16px;">
+          <button class="btn-primary" onclick="processRetrImport()">
+            <span>⚡</span> Process Import
+          </button>
+        </div>
+        <div class="status-bar" id="retrStatus"></div>
+        <div id="retrResults" style="margin-top:16px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toastTitle">Saved!</div>
+  <div id="toastMsg"></div>
+</div>
+
+<script>
+// ==========================================
+// CONFIG
+// ==========================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoF-O2C_5Lxi8cxZIYti0FghcaSISzwZsBLA-ZcLtqM7pdJ21eVXCyaoT-nVP8_qgs/exec';
+const SECRET_TOKEN = 'lopi4';
+
+// Column maps (0-indexed, based on actual sheet structure)
+// Target 300: Name(A), #(B), D/E/F(C), Company(D), Phone(E), Email(F), Notes(G), Last Reach Out(H), Next Call(I), Production(J), Social(K), Leads Referred(L), Last Lead Date(M), F2F/BB(N), Zoom(O), Last Contact(P), Birthday(Q), Gifted(R), Hobbies(S), Important(T), Address(U)
+const SHEET_CONFIGS = {
+  'Target 300 RLTRs': {
+    nameCol: 0, companyCol: 3, phoneCol: 4, emailCol: 5,
+    notesCol: 6, lastReachOutCol: 7, nextCallCol: 8,
+    productionCol: 9, socialCol: 10, leadsCol: 11, lastLeadCol: 12,
+    f2fCol: 13, zoomCol: 14, lastContactCol: 15, birthdayCol: 16,
+    giftedCol: 17, hobbiesCol: 18, importantCol: 19, addressCol: 20,
+    dataStartRow: 13, // 0-indexed row where data begins
+    classCol: 2,
+  },
+  'Focus 50 RLTRs': {
+    nameCol: 0, companyCol: 3, phoneCol: 4, emailCol: 5,
+    notesCol: 6, lastReachOutCol: 7, nextCallCol: 8,
+    productionCol: 9, socialCol: 10, leadsCol: 11, lastLeadCol: 12,
+    f2fCol: 13, zoomCol: 14, lastContactCol: 15, birthdayCol: 16,
+    giftedCol: 17, hobbiesCol: 18, importantCol: 19, addressCol: 20,
+    dataStartRow: 13,
+    classCol: 2,
+  },
+  'Focus 50 COI': {
+    nameCol: 0, companyCol: 4, phoneCol: 5, emailCol: 6,
+    notesCol: 21, lastReachOutCol: 8, nextCallCol: 9,
+    productionCol: 10, socialCol: 11, leadsCol: 12, lastLeadCol: 13,
+    f2fCol: 14, zoomCol: 15, lastContactCol: 16, birthdayCol: 17,
+    giftedCol: 18, hobbiesCol: 19, importantCol: 20,
+    dataStartRow: 13,
+    classCol: 2,
+  }
+};
+
+const SHEET_NAMES = Object.keys(SHEET_CONFIGS);
+let pendingUpdate = null;
+
+// ==========================================
+// INIT
+// ==========================================
+window.onload = () => {
+  // Nothing to initialize - Apps Script handles auth
+};
+
+// ==========================================
+// TAB SWITCHING
+// ==========================================
+function switchTab(name) {
+  ['debrief','followup','retr'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['debrief','followup','retr'][i] === name);
+  });
+}
+
+// ==========================================
+// APPS SCRIPT HELPERS
+// ==========================================
+async function getSheetData(sheetName) {
+  const url = `${APPS_SCRIPT_URL}?action=getSheet&sheetName=${encodeURIComponent(sheetName)}&token=${SECRET_TOKEN}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch sheet: ${res.status}`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'Unknown error');
+  return data.values || [];
+}
+
+async function writeCells(sheetName, rowIndex, updates) {
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      action: 'writeRows',
+      token: SECRET_TOKEN,
+      sheetName,
+      updates: updates.map(u => ({ row: rowIndex, col: u.col, value: u.value }))
+    })
+  });
+  if (!res.ok) throw new Error(`Write failed: ${res.status}`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'Write error');
+}
+
+async function appendRowToSheet(sheetName, rowIndex, updates) {
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      action: 'appendRow',
+      token: SECRET_TOKEN,
+      sheetName,
+      rowIndex,
+      updates: updates.map(u => ({ col: u.col, value: u.value }))
+    })
+  });
+  if (!res.ok) throw new Error(`Append failed: ${res.status}`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'Append error');
+}
+
+// ==========================================
+// CONTACT SEARCH
+// ==========================================
+function normalizeName(name) {
+  return (name || '').toLowerCase().replace(/[^a-z\s]/g, '').trim();
+}
+
+function fuzzyMatch(query, target) {
+  const q = normalizeName(query);
+  const t = normalizeName(target);
+  if (!q || !t) return 0;
+  if (t === q) return 1.0;
+  if (t.includes(q) || q.includes(t)) return 0.9;
+  const qParts = q.split(' ');
+  const tParts = t.split(' ');
+  const matches = qParts.filter(p => tParts.some(tp => tp.startsWith(p) || p.startsWith(tp)));
+  return matches.length / Math.max(qParts.length, tParts.length);
+}
+
+async function searchAllSheets(nameQuery) {
+  const results = [];
+  for (const sheetName of SHEET_NAMES) {
+    const cfg = SHEET_CONFIGS[sheetName];
+    const rows = await getSheetData(sheetName);
+    for (let i = cfg.dataStartRow; i < rows.length; i++) {
+      const row = rows[i] || [];
+      const name = row[cfg.nameCol] || '';
+      if (!name.trim()) continue;
+      const score = fuzzyMatch(nameQuery, name);
+      if (score >= 0.5) {
+        results.push({ sheetName, rowIndex: i, row, score, cfg, name: name.trim() });
+      }
+    }
+  }
+  results.sort((a, b) => b.score - a.score);
+  return results;
+}
+
+// ==========================================
+// AI DEBRIEF PARSING (via Anthropic API)
+// ==========================================
+async function parseDebrief(text) {
+  const today = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+  const systemPrompt = `You are a CRM assistant for Nate Dahlin, a mortgage loan officer in Tampa FL.
+Parse a call debrief and extract structured update data. Return ONLY valid JSON, no markdown, no explanation.
+
+Output format:
+{
+  "contact_name": "full name mentioned",
+  "updates": {
+    "notes": "new note to append or replace (preserve existing context, add new info)",
+    "last_reach_out": "date if mentioned or today ${today}",
+    "next_call": "follow-up date if mentioned",
+    "production": "volume/units if mentioned",
+    "social": "Y or N if mentioned",
+    "leads_referred": "number if mentioned",
+    "f2f_bb": "F2F or BB with date if mentioned (F2F=quick meeting, BB=sit-down)",
+    "zoom": "date if zoom mentioned",
+    "last_contact": "${today}",
+    "hobbies": "personal info if mentioned",
+    "important": "what matters to them if mentioned"
+  },
+  "is_new_contact": false,
+  "suggested_tab": "Target 300 RLTRs or Focus 50 RLTRs or Focus 50 COI",
+  "confidence": 0.9
+}
+
+Only include fields in "updates" if they have actual values from the debrief. Always include last_reach_out and last_contact as today if not stated. Notes should be concise and professional.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: text }]
+    })
+  });
+  const data = await response.json();
+  const raw = data.content?.[0]?.text || '{}';
+  const clean = raw.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ==========================================
+// DEBRIEF FLOW
+// ==========================================
+async function analyzeDebrief() {
+  const text = document.getElementById('debriefInput').value.trim();
+  if (!text) return;
+
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  showStatus('loading', 'Reading your debrief...');
+  hideConfirmCard();
+
+  try {
+    // Step 1: Parse debrief with AI
+    showStatus('loading', 'Parsing debrief with AI...');
+    const parsed = await parseDebrief(text);
+
+    if (!parsed.contact_name) {
+      showStatus('error', "Couldn't find a contact name in your debrief. Try mentioning the person's name.");
+      btn.disabled = false;
+      return;
+    }
+
+    // Step 2: Search sheet
+    showStatus('loading', `Searching for "${parsed.contact_name}" in your workbook...`);
+    const matches = await searchAllSheets(parsed.contact_name);
+
+    if (matches.length === 0) {
+      // No match - offer to add new
+      showNewContactPrompt(parsed);
+    } else if (matches.length === 1 || matches[0].score === 1.0) {
+      // Single/exact match
+      showConfirmUpdate(matches[0], parsed);
+    } else {
+      // Multiple matches
+      showMultipleMatches(matches.slice(0, 4), parsed);
+    }
+
+    hideStatus();
+  } catch (err) {
+    showStatus('error', `Error: ${err.message}`);
+  }
+  btn.disabled = false;
+}
+
+function showConfirmUpdate(match, parsed) {
+  const cfg = match.cfg;
+  const row = match.row;
+
+  const fieldMap = [
+    { label: 'Notes', col: cfg.notesCol, key: 'notes' },
+    { label: 'Last Reach Out', col: cfg.lastReachOutCol, key: 'last_reach_out' },
+    { label: 'Next Call', col: cfg.nextCallCol, key: 'next_call' },
+    { label: 'Production', col: cfg.productionCol, key: 'production' },
+    { label: 'Social Media', col: cfg.socialCol, key: 'social' },
+    { label: 'Leads Referred', col: cfg.leadsCol, key: 'leads_referred' },
+    { label: 'F2F / BB', col: cfg.f2fCol, key: 'f2f_bb' },
+    { label: 'Zoom Call', col: cfg.zoomCol, key: 'zoom' },
+    { label: 'Last Contact', col: cfg.lastContactCol, key: 'last_contact' },
+    { label: 'Hobbies / Personal', col: cfg.hobbiesCol, key: 'hobbies' },
+    { label: "What's Important", col: cfg.importantCol, key: 'important' },
+  ];
+
+  const updates = fieldMap.filter(f => parsed.updates?.[f.key]);
+
+  const initials = match.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+  const company = row[cfg.companyCol] || '';
+  const tabLabel = match.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
+
+  let html = `
+    <div class="match-info">
+      <div class="match-avatar">${initials}</div>
+      <div>
+        <div class="match-name">${match.name}</div>
+        <div class="match-meta">${company || 'No company on file'} &bull; Row ${match.rowIndex + 1}</div>
+      </div>
+      <span class="match-tab">${tabLabel}</span>
+    </div>
+    <div class="changes-label">Proposed Changes</div>
+    <table class="changes-table">
+      <thead><tr><th>Field</th><th>Current Value</th><th>New Value</th></tr></thead>
+      <tbody>
+  `;
+
+  const cellUpdates = [];
+  for (const f of updates) {
+    const oldVal = row[f.col] || '';
+    const newVal = parsed.updates[f.key];
+    // For notes, append rather than replace if there's existing content
+    let displayNew = newVal;
+    let writeVal = newVal;
+    if (f.key === 'notes' && oldVal) {
+      const today = new Date().toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'2-digit'});
+      writeVal = `${oldVal} | ${today}: ${newVal}`;
+      displayNew = `[appended] ${newVal}`;
+    }
+    html += `
+      <tr>
+        <td class="col-field">${f.label}</td>
+        <td class="col-old">${oldVal || '<span class="empty-val">empty</span>'}</td>
+        <td class="col-new"><span class="new-val"><span class="new-dot"></span>${displayNew}</span></td>
+      </tr>
+    `;
+    cellUpdates.push({ col: f.col, value: writeVal });
+  }
+
+  html += `</tbody></table>
+    <div class="confirm-actions">
+      <button class="btn-confirm" onclick="executeUpdate()">✓ Confirm & Save to Sheet</button>
+      <button class="btn-secondary" onclick="hideConfirmCard()">Cancel</button>
+    </div>
+  `;
+
+  pendingUpdate = { match, cellUpdates };
+
+  document.getElementById('confirmTitle').textContent = `Update: ${match.name}`;
+  document.getElementById('confirmBadge').textContent = `${updates.length} field${updates.length !== 1 ? 's' : ''}`;
+  document.getElementById('confirmBody').innerHTML = html;
+  document.getElementById('confirmCard').classList.add('visible');
+  document.getElementById('confirmCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showMultipleMatches(matches, parsed) {
+  let html = `
+    <p style="font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:14px;">Found ${matches.length} possible matches. Which one did you mean?</p>
+    <div class="match-select-list" id="matchSelectList">
+  `;
+  matches.forEach((m, i) => {
+    const cfg = m.cfg;
+    const company = m.row[cfg.companyCol] || 'No company';
+    const tabLabel = m.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
+    html += `
+      <div class="match-option" onclick="selectMatch(${i})" id="matchOpt${i}">
+        <div>
+          <div class="match-option-name">${m.name}</div>
+          <div class="match-option-meta">${company} &bull; ${tabLabel}</div>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>
+    <div class="confirm-actions" style="margin-top:14px;">
+      <button class="btn-confirm" onclick="confirmMatchSelection()" id="matchConfirmBtn" disabled>Select This Contact</button>
+      <button class="btn-secondary" onclick="hideConfirmCard()">Cancel</button>
+    </div>
+  `;
+
+  pendingUpdate = { multiMatches: matches, parsed, selectedIndex: -1 };
+
+  document.getElementById('confirmTitle').textContent = 'Multiple Contacts Found';
+  document.getElementById('confirmBadge').textContent = 'Select One';
+  document.getElementById('confirmBody').innerHTML = html;
+  document.getElementById('confirmCard').classList.add('visible');
+  document.getElementById('confirmCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function selectMatch(i) {
+  document.querySelectorAll('.match-option').forEach((el, idx) => {
+    el.classList.toggle('selected', idx === i);
+  });
+  pendingUpdate.selectedIndex = i;
+  document.getElementById('matchConfirmBtn').disabled = false;
+}
+
+function confirmMatchSelection() {
+  const { multiMatches, parsed, selectedIndex } = pendingUpdate;
+  if (selectedIndex < 0) return;
+  showConfirmUpdate(multiMatches[selectedIndex], parsed);
+}
+
+function showNewContactPrompt(parsed) {
+  const today = new Date().toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'2-digit'});
+  const nameParts = (parsed.contact_name || '').split(' ');
+
+  let html = `
+    <p style="font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:16px;">
+      No match found for <strong>${parsed.contact_name}</strong>. Would you like to add them as a new contact?
+    </p>
+    <div class="new-contact-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="nc_name" value="${parsed.contact_name}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Add to Tab</label>
+          <select class="form-select" id="nc_tab">
+            <option value="Target 300 RLTRs">Target 300 RLTRs</option>
+            <option value="Focus 50 RLTRs">Focus 50 RLTRs</option>
+            <option value="Focus 50 COI">Focus 50 COI</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input class="form-input" id="nc_company" placeholder="Brokerage or firm" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="nc_phone" placeholder="813-xxx-xxxx" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="nc_email" placeholder="email@domain.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (from debrief)</label>
+        <input class="form-input" id="nc_notes" value="${parsed.updates?.notes || ''}" />
+      </div>
+    </div>
+    <div class="confirm-actions" style="margin-top:20px;">
+      <button class="btn-confirm" onclick="executeNewContact()">+ Add to Sheet</button>
+      <button class="btn-secondary" onclick="hideConfirmCard()">Cancel</button>
+    </div>
+  `;
+
+  pendingUpdate = { parsed, isNew: true };
+  document.getElementById('confirmTitle').textContent = 'New Contact';
+  document.getElementById('confirmBadge').textContent = 'Not Found';
+  document.getElementById('confirmBody').innerHTML = html;
+  document.getElementById('confirmCard').classList.add('visible');
+  document.getElementById('confirmCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function executeUpdate() {
+  if (!pendingUpdate) return;
+  const { match, cellUpdates } = pendingUpdate;
+  showStatus('loading', `Saving to ${match.sheetName}...`);
+  try {
+    await writeCells(match.sheetName, match.rowIndex, cellUpdates);
+    hideConfirmCard();
+    hideStatus();
+    clearDebrief();
+    showToast('Saved!', `${match.name} updated in ${match.sheetName}.`);
+  } catch (err) {
+    showStatus('error', `Save failed: ${err.message}`);
+  }
+}
+
+async function executeNewContact() {
+  const sheetName = document.getElementById('nc_tab').value;
+  const cfg = SHEET_CONFIGS[sheetName];
+  const name = document.getElementById('nc_name').value.trim();
+  const company = document.getElementById('nc_company').value.trim();
+  const phone = document.getElementById('nc_phone').value.trim();
+  const email = document.getElementById('nc_email').value.trim();
+  const notes = document.getElementById('nc_notes').value.trim();
+  const today = new Date().toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'2-digit'});
+
+  showStatus('loading', 'Finding next empty row...');
+  try {
+    const rows = await getSheetData(sheetName);
+    // Find first empty row after header
+    let emptyRow = cfg.dataStartRow;
+    for (let i = cfg.dataStartRow; i < rows.length; i++) {
+      if (!rows[i] || !rows[i][cfg.nameCol] || !rows[i][cfg.nameCol].trim()) { emptyRow = i; break; }
+      emptyRow = i + 1;
+    }
+
+    const updates = [
+      { col: cfg.nameCol, value: name },
+      { col: cfg.companyCol, value: company },
+      { col: cfg.phoneCol, value: phone },
+      { col: cfg.emailCol, value: email },
+      { col: cfg.notesCol, value: notes },
+      { col: cfg.lastReachOutCol, value: today },
+      { col: cfg.lastContactCol, value: today },
+    ];
+
+    await appendRowToSheet(sheetName, emptyRow, updates);
+    hideConfirmCard();
+    hideStatus();
+    clearDebrief();
+    showToast('Contact Added!', `${name} added to ${sheetName}.`);
+  } catch (err) {
+    showStatus('error', `Error adding contact: ${err.message}`);
+  }
+}
+
+// ==========================================
+// FOLLOW-UP NUDGES
+// ==========================================
+async function loadFollowUpNudges() {
+  const btn = document.getElementById('loadNudgesBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Loading...';
+
+  const today = new Date();
+  const todayStr = today.toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'2-digit'});
+  const nudges = [];
+
+  try {
+    for (const sheetName of ['Target 300 RLTRs', 'Focus 50 RLTRs', 'Focus 50 COI']) {
+      const cfg = SHEET_CONFIGS[sheetName];
+      const rows = await getSheetData(sheetName);
+      for (let i = cfg.dataStartRow; i < rows.length; i++) {
+        const row = rows[i] || [];
+        const name = row[cfg.nameCol];
+        if (!name || !name.trim()) continue;
+        const nextCallStr = row[cfg.nextCallCol];
+        if (!nextCallStr) continue;
+        const nextCall = parseDate(nextCallStr);
+        if (!nextCall) continue;
+        const diffDays = Math.floor((nextCall - today) / (1000*60*60*24));
+        if (diffDays <= 3) {
+          nudges.push({
+            name: name.trim(),
+            company: row[cfg.companyCol] || '',
+            nextCall: nextCallStr,
+            diffDays,
+            sheetName
+          });
+        }
+      }
+    }
+
+    nudges.sort((a, b) => a.diffDays - b.diffDays);
+
+    if (nudges.length === 0) {
+      document.getElementById('nudgeList').innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">No calls due in the next 3 days. You're caught up!</div></div>`;
+    } else {
+      let html = `<div class="nudge-list">`;
+      for (const n of nudges) {
+        const urgency = n.diffDays < 0 ? 'overdue' : n.diffDays === 0 ? 'today' : 'soon';
+        const label = n.diffDays < 0 ? `${Math.abs(n.diffDays)}d overdue` : n.diffDays === 0 ? 'Today' : `In ${n.diffDays}d`;
+        const tabLabel = n.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
+        html += `
+          <div class="nudge-item">
+            <div class="nudge-urgency urgency-${urgency}"></div>
+            <div style="flex:1">
+              <div class="nudge-name">${n.name}</div>
+              <div class="nudge-company">${n.company}</div>
+            </div>
+            <div class="nudge-date ${urgency === 'overdue' ? 'overdue' : ''}">${label} &bull; ${n.nextCall}</div>
+            <div class="nudge-tab">${tabLabel}</div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+      document.getElementById('nudgeList').innerHTML = html;
+    }
+  } catch (err) {
+    document.getElementById('nudgeList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error loading data: ${err.message}</div></div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span>🔄</span> Refresh';
+}
+
+function parseDate(str) {
+  if (!str) return null;
+  // Handle formats like 5/18, 5/18/26, 5/18/2026
+  const parts = str.trim().split('/');
+  if (parts.length < 2) return null;
+  const m = parseInt(parts[0]);
+  const d = parseInt(parts[1]);
+  const y = parts[2] ? (parseInt(parts[2]) < 100 ? 2000 + parseInt(parts[2]) : parseInt(parts[2])) : new Date().getFullYear();
+  if (isNaN(m) || isNaN(d)) return null;
+  return new Date(y, m-1, d);
+}
+
+// ==========================================
+// RETR IMPORT
+// ==========================================
+async function processRetrImport() {
+  const csv = document.getElementById('retrInput').value.trim();
+  if (!csv) return;
+
+  const statusEl = document.getElementById('retrStatus');
+  const resultsEl = document.getElementById('retrResults');
+  statusEl.className = 'status-bar visible';
+  statusEl.innerHTML = '<div class="spinner"></div><span>Processing CSV...</span>';
+  resultsEl.innerHTML = '';
+
+  try {
+    const lines = csv.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const rows = lines.slice(1).map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
+
+    // Try to identify name, volume, units columns
+    const nameIdx = headers.findIndex(h => h.includes('name') || h.includes('agent'));
+    const volIdx = headers.findIndex(h => h.includes('volume') || h.includes('vol'));
+    const unitsIdx = headers.findIndex(h => h.includes('unit') || h.includes('trans') || h.includes('sold'));
+
+    if (nameIdx < 0) {
+      statusEl.className = 'status-bar visible error';
+      statusEl.innerHTML = '<span>Could not find a Name column in your CSV. Check the headers.</span>';
+      return;
+    }
+
+    // Use AI to parse and match
+    const prompt = `I have agent production data from RETR. Headers: ${headers.join(', ')}. 
+For each agent row, extract: name, volume (dollar amount), and transaction count.
+Data (first 20 rows): ${rows.slice(0,20).map(r => r.join(' | ')).join('\n')}
+Return JSON array: [{"name":"...", "volume":"...", "units":"..."}]
+Return ONLY the JSON array, no markdown.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const aiData = await response.json();
+    const raw = aiData.content?.[0]?.text || '[]';
+    const agents = JSON.parse(raw.replace(/```json|```/g,'').trim());
+
+    statusEl.innerHTML = '<div class="spinner"></div><span>Matching agents to your workbook...</span>';
+
+    const matched = [];
+    const unmatched = [];
+
+    for (const agent of agents) {
+      const matches = await searchAllSheets(agent.name);
+      if (matches.length > 0 && matches[0].score >= 0.7) {
+        const m = matches[0];
+        const cfg = m.cfg;
+        const production = `${agent.units || '?'} / ${agent.volume || '?'}`;
+        matched.push({ agent, match: m, production });
+      } else {
+        unmatched.push(agent);
+      }
+    }
+
+    statusEl.className = 'status-bar visible';
+    statusEl.innerHTML = `<span>✓ Found ${matched.length} matches. ${unmatched.length} not found.</span>`;
+
+    if (matched.length === 0) {
+      resultsEl.innerHTML = `<div class="empty-state"><div class="empty-text">No agents from the CSV matched contacts in your workbook.</div></div>`;
+      return;
+    }
+
+    let html = `
+      <div class="changes-label" style="margin-bottom:12px;">Matched Agents - Review & Confirm</div>
+      <table class="changes-table" style="background:white;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+        <thead><tr><th>Agent</th><th>Tab</th><th>Production Update</th><th></th></tr></thead>
+        <tbody>
+    `;
+    matched.forEach((m, i) => {
+      const tabLabel = m.match.sheetName.replace('Focus 50 ','').replace('Target 300 ','T300 ');
+      html += `
+        <tr>
+          <td class="col-field">${m.match.name}</td>
+          <td style="font-size:13px;color:var(--charcoal)">${tabLabel}</td>
+          <td><span class="new-val"><span class="new-dot"></span>${m.production}</span></td>
+          <td><input type="checkbox" id="retr_cb_${i}" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--green);" /></td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table>`;
+
+    if (unmatched.length > 0) {
+      html += `<p style="font-size:13px;color:var(--charcoal);margin-top:12px;opacity:0.7;">Not matched (not in your workbook): ${unmatched.map(u=>u.name).join(', ')}</p>`;
+    }
+
+    html += `
+      <div class="confirm-actions" style="margin-top:16px;">
+        <button class="btn-confirm" onclick="executeRetrImport(${JSON.stringify(matched).replace(/"/g,'&quot;')})">✓ Save Checked Updates</button>
+        <button class="btn-secondary" onclick="document.getElementById('retrResults').innerHTML=''">Cancel</button>
+      </div>
+    `;
+
+    resultsEl.innerHTML = html;
+    window._retrMatched = matched;
+
+  } catch (err) {
+    statusEl.className = 'status-bar visible error';
+    statusEl.innerHTML = `<span>Error: ${err.message}</span>`;
+  }
+}
+
+async function executeRetrImport(matched) {
+  let saved = 0;
+  for (let i = 0; i < matched.length; i++) {
+    const cb = document.getElementById(`retr_cb_${i}`);
+    if (!cb || !cb.checked) continue;
+    const m = matched[i];
+    const cfg = m.match.cfg;
+    try {
+      await writeCells(m.match.sheetName, m.match.rowIndex, [{ col: cfg.productionCol, value: m.production }]);
+      saved++;
+    } catch(e) { console.error(e); }
+  }
+  document.getElementById('retrResults').innerHTML = '';
+  document.getElementById('retrStatus').className = 'status-bar visible';
+  document.getElementById('retrStatus').innerHTML = `<span>✓ Updated production data for ${saved} agent${saved !== 1 ? 's' : ''}.</span>`;
+  showToast('Import Complete', `${saved} agent${saved !== 1 ? 's' : ''} updated.`);
+}
+
+// ==========================================
+// UI HELPERS
+// ==========================================
+function showStatus(type, msg) {
+  const bar = document.getElementById('statusBar');
+  bar.className = 'status-bar visible' + (type === 'error' ? ' error' : '');
+  bar.innerHTML = type === 'loading'
+    ? `<div class="spinner"></div><span>${msg}</span>`
+    : `<span>${msg}</span>`;
+}
+function hideStatus() { document.getElementById('statusBar').className = 'status-bar'; }
+function hideConfirmCard() {
+  document.getElementById('confirmCard').classList.remove('visible');
+  pendingUpdate = null;
+}
+function clearDebrief() { document.getElementById('debriefInput').value = ''; }
+
+function showToast(title, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
