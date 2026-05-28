@@ -1260,8 +1260,14 @@ async function loadFollowUpNudges() {
 
 function parseDate(str) {
   if (!str) return null;
-  // Extract just the date portion - grab first token that looks like M/D or M/D/YY
-  const match = str.toString().trim().match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+  const s = str.toString().trim();
+  // Handle ISO format returned by Google Sheets: 2026-05-18T07:00:00.000Z
+  if (s.includes('T') && s.includes('-')) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  // Handle M/D, M/D/YY, M/D/YYYY with optional trailing text like "5/28 DM"
+  const match = s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
   if (!match) return null;
   const m = parseInt(match[1]);
   const d = parseInt(match[2]);
