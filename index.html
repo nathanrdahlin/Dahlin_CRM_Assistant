@@ -498,8 +498,7 @@
   .nudge-list { display: flex; flex-direction: column; gap: 10px; }
   .nudge-item {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
     padding: 14px 16px;
     background: white;
     border-radius: 10px;
@@ -1251,6 +1250,7 @@ async function loadFollowUpNudges() {
             name: name.trim(),
             company: row[cfg.companyCol] || '',
             nextCall: nextCallStr,
+            notes: row[cfg.notesCol] || '',
             diffDays,
             sheetName
           });
@@ -1268,15 +1268,19 @@ async function loadFollowUpNudges() {
         const urgency = n.diffDays < 0 ? 'overdue' : n.diffDays === 0 ? 'today' : 'soon';
         const label = n.diffDays < 0 ? `${Math.abs(n.diffDays)}d overdue` : n.diffDays === 0 ? 'Today' : `In ${n.diffDays}d`;
         const tabLabel = n.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
+        const notesPreview = n.notes ? (n.notes.length > 80 ? n.notes.substring(0, 80) + '...' : n.notes) : '';
         html += `
           <div class="nudge-item">
-            <div class="nudge-urgency urgency-${urgency}"></div>
-            <div style="flex:1">
-              <div class="nudge-name">${n.name}</div>
-              <div class="nudge-company">${n.company}</div>
+            <div style="display:flex;align-items:center;gap:14px;width:100%">
+              <div class="nudge-urgency urgency-${urgency}" style="flex-shrink:0"></div>
+              <div style="flex:1;min-width:0">
+                <div class="nudge-name">${n.name}</div>
+                <div class="nudge-company">${n.company}</div>
+              </div>
+              <div class="nudge-date ${urgency === 'overdue' ? 'overdue' : ''}" style="flex-shrink:0">${label} &bull; ${formatDate(n.nextCall)}</div>
+              <div class="nudge-tab" style="flex-shrink:0">${tabLabel}</div>
             </div>
-            <div class="nudge-date ${urgency === 'overdue' ? 'overdue' : ''}">${label} &bull; ${formatDate(n.nextCall)}</div>
-            <div class="nudge-tab">${tabLabel}</div>
+            ${notesPreview ? `<div style="margin-top:10px;padding:8px 12px;background:var(--cream);border-radius:6px;border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--charcoal);line-height:1.5;width:100%">${notesPreview}</div>` : ''}
           </div>
         `;
       }
