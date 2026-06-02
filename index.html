@@ -1199,6 +1199,16 @@ function showNewContactPrompt(parsed) {
         <label class="form-label">Email</label>
         <input class="form-input" id="nc_email" placeholder="email@domain.com" />
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Next Call Date</label>
+          <input class="form-input" id="nc_next_call" value="${parsed.updates?.next_call || ''}" placeholder="e.g. 6/16/26" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">D/E/F or A/B/C Class</label>
+          <input class="form-input" id="nc_class" placeholder="e.g. D, E, F, A, B, C" />
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label">Notes (from debrief)</label>
         <input class="form-input" id="nc_notes" value="${parsed.updates?.notes || ''}" />
@@ -1241,12 +1251,13 @@ async function executeNewContact() {
   const phone = document.getElementById('nc_phone').value.trim();
   const email = document.getElementById('nc_email').value.trim();
   const notes = document.getElementById('nc_notes').value.trim();
+  const nextCall = document.getElementById('nc_next_call').value.trim();
+  const contactClass = document.getElementById('nc_class').value.trim();
   const today = new Date().toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'2-digit'});
 
   showStatus('loading', 'Finding next empty row...');
   try {
     const rows = await getSheetData(sheetName);
-    // Find first empty row after header
     let emptyRow = cfg.dataStartRow;
     for (let i = cfg.dataStartRow; i < rows.length; i++) {
       if (!rows[i] || !rows[i][cfg.nameCol] || !rows[i][cfg.nameCol].trim()) { emptyRow = i; break; }
@@ -1262,6 +1273,9 @@ async function executeNewContact() {
       { col: cfg.lastReachOutCol, value: today },
       { col: cfg.lastContactCol, value: today },
     ];
+
+    if (nextCall) updates.push({ col: cfg.nextCallCol, value: nextCall });
+    if (contactClass) updates.push({ col: cfg.classCol, value: contactClass });
 
     await appendRowToSheet(sheetName, emptyRow, updates);
     hideConfirmCard();
