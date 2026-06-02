@@ -851,11 +851,35 @@ function fuzzyMatch(query, target) {
   const t = normalizeName(target);
   if (!q || !t) return 0;
   if (t === q) return 1.0;
-  if (t.includes(q) || q.includes(t)) return 0.9;
-  const qParts = q.split(' ');
-  const tParts = t.split(' ');
-  const matches = qParts.filter(p => tParts.some(tp => tp.startsWith(p) || p.startsWith(tp)));
-  return matches.length / Math.max(qParts.length, tParts.length);
+
+  const qParts = q.split(' ').filter(p => p.length > 0);
+  const tParts = t.split(' ').filter(p => p.length > 0);
+
+  // Need at least first and last name to match confidently
+  if (qParts.length >= 2 && tParts.length >= 2) {
+    const firstMatch = qParts[0] === tParts[0] || tParts[0].startsWith(qParts[0]) || qParts[0].startsWith(tParts[0]);
+    const lastMatch = qParts[qParts.length-1] === tParts[tParts.length-1] ||
+                      tParts[tParts.length-1].startsWith(qParts[qParts.length-1]) ||
+                      qParts[qParts.length-1].startsWith(tParts[tParts.length-1]);
+    if (firstMatch && lastMatch) return 0.95;
+    if (lastMatch) return 0.7;
+    if (firstMatch) return 0.5;
+    return 0;
+  }
+
+  // Single name query - only match if it's the last name (more unique)
+  if (qParts.length === 1) {
+    const q0 = qParts[0];
+    // Exact last name match
+    if (tParts[tParts.length-1] === q0) return 0.75;
+    // Partial last name
+    if (tParts[tParts.length-1].startsWith(q0) && q0.length >= 4) return 0.6;
+    // First name only - low confidence
+    if (tParts[0] === q0) return 0.45;
+    return 0;
+  }
+
+  return 0;
 }
 
 async function searchAllSheets(nameQuery) {
@@ -969,12 +993,19 @@ async function analyzeDebrief() {
     if (matches.length === 0) {
       // No match - offer to add new
       showNewContactPrompt(parsed);
-    } else if (matches.length === 1 || matches[0].score === 1.0) {
-      // Single/exact match
+    } else if (matches.length === 1 && matches[0].score >= 0.9) {
+      // Single high-confidence match
+      matches[0]._allMatches = matches;
+      matches[0]._parsed = parsed;
+      showConfirmUpdate(matches[0], parsed);
+    } else if (matches[0].score === 1.0) {
+      // Exact match
+      matches[0]._allMatches = matches;
+      matches[0]._parsed = parsed;
       showConfirmUpdate(matches[0], parsed);
     } else {
-      // Multiple matches
-      showMultipleMatches(matches.slice(0, 4), parsed);
+      // Multiple or low-confidence matches - show selection
+      showMultipleMatches(matches.slice(0, 5), parsed);
     }
 
     hideStatus();
@@ -1050,9 +1081,13 @@ function showConfirmUpdate(match, parsed) {
       <button class="btn-confirm" onclick="executeUpdate()">✓ Confirm & Save to Sheet</button>
       <button class="btn-secondary" onclick="hideConfirmCard()">Cancel</button>
     </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-secondary" style="font-size:13px;padding:8px 14px;" onclick="showOtherMatches()">Not the right person?</button>
+      <button class="btn-secondary" style="font-size:13px;padding:8px 14px;" onclick="showNewContactPrompt(pendingUpdate.parsed)">Create new contact instead</button>
+    </div>
   `;
 
-  pendingUpdate = { match, cellUpdates };
+  pendingUpdate = { match, cellUpdates, parsed, allMatches: match._allMatches || [] };
 
   document.getElementById('confirmTitle').textContent = `Update: ${match.name}`;
   document.getElementById('confirmBadge').textContent = `${updates.length} field${updates.length !== 1 ? 's' : ''}`;
@@ -1082,6 +1117,7 @@ function showMultipleMatches(matches, parsed) {
   html += `</div>
     <div class="confirm-actions" style="margin-top:14px;">
       <button class="btn-confirm" onclick="confirmMatchSelection()" id="matchConfirmBtn" disabled>Select This Contact</button>
+      <button class="btn-secondary" onclick="showNewContactPrompt(pendingUpdate.parsed)">None of these - Create New</button>
       <button class="btn-secondary" onclick="hideConfirmCard()">Cancel</button>
     </div>
   `;
@@ -1093,6 +1129,23 @@ function showMultipleMatches(matches, parsed) {
   document.getElementById('confirmBody').innerHTML = html;
   document.getElementById('confirmCard').classList.add('visible');
   document.getElementById('confirmCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function showOtherMatches() {
+  const { parsed } = pendingUpdate;
+  if (!parsed) return;
+  showStatus('loading', 'Searching for other possible matches...');
+  try {
+    const matches = await searchAllSheets(parsed.contact_name);
+    hideStatus();
+    if (matches.length <= 1) {
+      showNewContactPrompt(parsed);
+    } else {
+      showMultipleMatches(matches.slice(0, 5), parsed);
+    }
+  } catch(err) {
+    showStatus('error', `Search failed: ${err.message}`);
+  }
 }
 
 function selectMatch(i) {
