@@ -1335,7 +1335,7 @@ async function loadFollowUpNudges() {
         const urgency = n.diffDays < 0 ? 'overdue' : n.diffDays === 0 ? 'today' : 'soon';
         const label = n.diffDays < 0 ? `${Math.abs(n.diffDays)}d overdue` : n.diffDays === 0 ? 'Today' : `In ${n.diffDays}d`;
         const tabLabel = n.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
-        const notesPreview = n.notes ? (n.notes.length > 80 ? n.notes.substring(0, 80) + '...' : n.notes) : '';
+        const notesPreview = n.notes ? (n.notes.length > 250 ? n.notes.substring(0, 250) + '...' : n.notes) : '';
         html += `
           <div class="nudge-item">
             <div style="display:flex;align-items:center;gap:14px;width:100%">
