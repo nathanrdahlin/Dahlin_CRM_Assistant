@@ -1338,7 +1338,7 @@ async function loadFollowUpNudges() {
         const label = n.diffDays < 0 ? `${Math.abs(n.diffDays)}d overdue` : n.diffDays === 0 ? 'Today' : `In ${n.diffDays}d`;
         const tabLabel = n.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
         const notesPreview = n.notes ? (n.notes.length > 250 ? n.notes.substring(0, 250) + '...' : n.notes) : '';
-        const phoneHtml = n.phone ? `<a href="tel:${n.phone.replace(/\D/g,'')}" style="color:var(--navy);text-decoration:none;font-weight:600;font-size:13px;">📞 ${n.phone}</a>` : '';
+        const phoneHtml = n.phone ? `<a href="tel:${String(n.phone).replace(/\D/g,'')}" style="color:var(--navy);text-decoration:none;font-weight:600;font-size:13px;">📞 ${n.phone}</a>` : '';
         const emailHtml = n.email ? `<a href="mailto:${n.email}" style="color:var(--navy);text-decoration:none;font-weight:600;font-size:13px;">✉️ ${n.email}</a>` : '';
         const contactLineHtml = (phoneHtml || emailHtml) ? `<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:8px;">${phoneHtml}${emailHtml}</div>` : '';
         html += `
