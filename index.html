@@ -1318,6 +1318,8 @@ async function loadFollowUpNudges() {
             company: row[cfg.companyCol] || '',
             nextCall: nextCallStr,
             notes: row[cfg.notesCol] || '',
+            phone: row[cfg.phoneCol] || '',
+            email: row[cfg.emailCol] || '',
             diffDays,
             sheetName
           });
@@ -1336,6 +1338,9 @@ async function loadFollowUpNudges() {
         const label = n.diffDays < 0 ? `${Math.abs(n.diffDays)}d overdue` : n.diffDays === 0 ? 'Today' : `In ${n.diffDays}d`;
         const tabLabel = n.sheetName.replace('Focus 50 ', '').replace('Target 300 ', 'T300 ');
         const notesPreview = n.notes ? (n.notes.length > 250 ? n.notes.substring(0, 250) + '...' : n.notes) : '';
+        const phoneHtml = n.phone ? `<a href="tel:${n.phone.replace(/\D/g,'')}" style="color:var(--navy);text-decoration:none;font-weight:600;font-size:13px;">📞 ${n.phone}</a>` : '';
+        const emailHtml = n.email ? `<a href="mailto:${n.email}" style="color:var(--navy);text-decoration:none;font-weight:600;font-size:13px;">✉️ ${n.email}</a>` : '';
+        const contactLineHtml = (phoneHtml || emailHtml) ? `<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:8px;">${phoneHtml}${emailHtml}</div>` : '';
         html += `
           <div class="nudge-item">
             <div style="display:flex;align-items:center;gap:14px;width:100%">
@@ -1347,6 +1352,7 @@ async function loadFollowUpNudges() {
               <div class="nudge-date ${urgency === 'overdue' ? 'overdue' : ''}" style="flex-shrink:0">${label} &bull; ${formatDate(n.nextCall)}</div>
               <div class="nudge-tab" style="flex-shrink:0">${tabLabel}</div>
             </div>
+            ${contactLineHtml}
             ${notesPreview ? `<div style="margin-top:10px;padding:8px 12px;background:var(--cream);border-radius:6px;border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--charcoal);line-height:1.5;width:100%">${notesPreview}</div>` : ''}
           </div>
         `;
