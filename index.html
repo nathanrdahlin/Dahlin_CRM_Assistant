@@ -725,7 +725,7 @@
 // ==========================================
 // CONFIG
 // ==========================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzlQ5sduBx66BxfH7DWDyMNniveTxZ-4VmWUGUq1E1n5OWLWpYwUIXrHHXU_CvIwEce/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydU8NtbPhPJt13U9D7iWDDQ2qAaL1KyDG0ZzsZVJNYygUrsax8GhA_47vifNO_sLg/exec';
 const SECRET_TOKEN = 'lopi4';
 let ANTHROPIC_KEY = localStorage.getItem('dahlin_anthropic_key') || '';
 
@@ -807,33 +807,16 @@ async function getSheetData(sheetName) {
 }
 
 async function writeCells(sheetName, rowIndex, updates) {
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({
-      action: 'writeRows',
-      token: SECRET_TOKEN,
-      sheetName,
-      updates: updates.map(u => ({ row: rowIndex, col: u.col, value: u.value }))
-    })
-  });
+  const url = `${APPS_SCRIPT_URL}?action=writeRows&sheetName=${encodeURIComponent(sheetName)}&token=${SECRET_TOKEN}&updates=${encodeURIComponent(JSON.stringify(updates.map(u => ({ row: rowIndex, col: u.col, value: u.value }))))}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Write failed: ${res.status}`);
   const data = await res.json();
   if (!data.success) throw new Error(data.error || 'Write error');
 }
 
 async function appendRowToSheet(sheetName, rowIndex, updates) {
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({
-      action: 'appendRow',
-      token: SECRET_TOKEN,
-      sheetName,
-      rowIndex,
-      updates: updates.map(u => ({ col: u.col, value: u.value }))
-    })
-  });
+  const url = `${APPS_SCRIPT_URL}?action=appendRow&sheetName=${encodeURIComponent(sheetName)}&token=${SECRET_TOKEN}&rowIndex=${rowIndex}&updates=${encodeURIComponent(JSON.stringify(updates.map(u => ({ col: u.col, value: u.value }))))}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Append failed: ${res.status}`);
   const data = await res.json();
   if (!data.success) throw new Error(data.error || 'Append error');
